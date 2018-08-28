@@ -66,13 +66,15 @@ class ReactComp extends Component {
         scrollPosition += this.heights[i] || 0;
       }
       this.scrollOver = false;
+
       // this.list.scrollToOffset({ offset: scrollPosition, animated: true });
-      this.list.scrollToLocation({
-        sectionIndex: 0,
-        itemIndex: scrollPosition,
-        viewOffset: 35, // get the user back to where they were
-        animated: true
-      });
+      this.list._wrapperListRef._listRef.scrollToOffset({ offset: scrollPosition, animated: true });
+      // this.list.scrollToLocation({
+      //   sectionIndex: 0,
+      //   itemIndex: scrollPosition,
+      //   viewOffset: 35, // get the user back to where they were
+      //   animated: true
+      // });
     }
     this.selectedDay = props.selectedDay;
     this.updateDataSource(reservations.reservations);
@@ -225,8 +227,8 @@ class ReactComp extends Component {
         refreshControl={this.props.refreshControl}
         refreshing={this.props.refreshing || false}
         onRefresh={this.props.onRefresh}
-        onStartReachedThreshold={0.2}
-        onEndReachedThreshold={0.8}
+        onStartReachedThreshold={0.01}
+        onEndReachedThreshold={0.01}
         onStartReached={this.props.onStartReached}
         onEndReached={this.props.onEndReached}
       />
