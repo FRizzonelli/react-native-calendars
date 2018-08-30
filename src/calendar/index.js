@@ -221,8 +221,7 @@ class Calendar extends Component {
     if (dates.length || dates) {
       return dates.length === 0 && this.props.disabledByDefault
         ? {
-          disabled: true,
-          disableTouchEvent: true
+          disabled: true
         } : dates;
     } else {
       return false;
