@@ -1,4 +1,3 @@
-import sortBy from 'lodash.sortby';
 import React, { Component } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import TwoWaySectionList from './two-way-section-list';
@@ -200,25 +199,6 @@ class ReactComp extends Component {
       }
       return <ActivityIndicator style={{ marginTop: 80 }} />;
     }
-    const sections = !this.props.reservations[this.props.selectedDay.toString('yyyy-MM-dd')]
-      ? [
-        {
-          title: 'reservations',
-          data: sortBy([
-            ...this.state.reservations,
-            {
-              date: this.props.selectedDay.clone(),
-              day: this.props.selectedDay.clone()
-            }
-          ], r => r.day)
-        }
-      ]
-    : [
-      {
-        title: 'reservations',
-        data: this.state.reservations
-      }
-    ];
 
     return (
       <TwoWaySectionList
@@ -226,7 +206,12 @@ class ReactComp extends Component {
         style={this.props.style}
         contentContainerStyle={this.styles.content}
         renderItem={this.renderRow.bind(this)}
-        sections={sections}
+        sections={[
+          {
+            title: 'reservations',
+            data: this.state.reservations
+          }
+        ]}
         getItemLayout={(data, index) => ({ length: 200, offset: 0, index })}
         onScroll={this.onScroll.bind(this)}
         showsVerticalScrollIndicator={false}
