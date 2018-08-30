@@ -58,6 +58,9 @@ export default class AgendaView extends Component {
     // Max amount of months allowed to scroll to the future. Default = 50
     futureScrollRange: PropTypes.number,
 
+    // Disable days by default. Default = false
+    disabledByDefault: PropTypes.bool,
+
     // initially selected day
     selected: PropTypes.any,
     // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined

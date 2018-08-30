@@ -176,15 +176,16 @@ class Calendar extends Component {
     } else {
       const DayComp = this.getDayComponent();
       const date = day.getDate();
+      const marking = this.getDateMarking(day);
       dayComp = (
         <DayComp
           key={id}
-          state={state}
+          state={marking.hasOwnProperty('disabled') ? state : ''}
           theme={this.props.theme}
           onPress={this.pressDay}
           onLongPress={this.longPressDay}
           date={xdateToData(day)}
-          marking={this.getDateMarking(day)}
+          marking={marking}
         >
           {date}
         </DayComp>
@@ -218,7 +219,11 @@ class Calendar extends Component {
     }
     const dates = this.props.markedDates[day.toString('yyyy-MM-dd')] || EmptyArray;
     if (dates.length || dates) {
-      return dates;
+      return dates.length === 0 && this.props.disabledByDefault
+        ? {
+          disabled: true,
+          disableTouchEvent: true
+        } : dates;
     } else {
       return false;
     }
