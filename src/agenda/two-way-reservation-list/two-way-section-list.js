@@ -1,151 +1,236 @@
 import React, { Component } from 'react';
-import { SectionList } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
+import TwoWaySectionList from './two-way-section-list';
+import Reservation from './reservation';
 import PropTypes from 'prop-types';
-import get from 'lodash.get';
-import isEqual from 'lodash.isequal';
+import XDate from 'xdate';
 
-// type Props = {
-//   onStartReached?: ?(info: { distanceFromEnd: number }) => void,
-//   onStartReachedThreshold?: ?number,
-//   onMomentumScrollEnd?: ScrollEvent => any,
-//   onScrollBeginDrag?: ScrollEvent => any,
-//   onScroll?: ScrollEvent => any,
-//   onLayout?: LayoutEvent => any
-// };
+import dateutils from '../../dateutils';
+import styleConstructor from './style';
 
-export default class extends Component {
-  // static defaultProps = {
-  //   onStartReachedThreshold: 0
-  // };
-  _listRef;
-
+class ReactComp extends Component {
   static propTypes = {
+    // specify your item comparison function for increased performance
+    rowHasChanged: PropTypes.func,
+    // specify how each item should be rendered in agenda
+    renderItem: PropTypes.func,
+    // specify how each date should be rendered. day can be undefined if the item is not first in that day.
+    renderDay: PropTypes.func,
+    // specify how empty date content with no items should be rendered
+    renderEmptyDate: PropTypes.func,
+    // callback that gets called when day changes while scrolling agenda list
+    onDayChange: PropTypes.func,
+    // onScroll ListView event
+    onScroll: PropTypes.func,
+    // the list of items that have to be displayed in agenda. If you want to render item as empty date
+    // the value of date key kas to be an empty array []. If there exists no value for date key it is
+    // considered that the date in question is not yet loaded
+    reservations: PropTypes.object,
     onStartReached: PropTypes.func,
-    onStartReachedThreshold: PropTypes.number,
-    onRef: PropTypes.func
+    onEndReached: PropTypes.func,
+
+    selectedDay: PropTypes.instanceOf(XDate),
+    initialDay: PropTypes.instanceOf(XDate),
+    refreshControl: PropTypes.element,
+    refreshing: PropTypes.bool,
+    onRefresh: PropTypes.func
   };
 
   constructor(props) {
     super(props);
-    this.state = {};
-    this.startThreshold = 0; // px from top onStartReached will be called
-    this.onStartAlreadyCalled = false; // called already for a drag/momentum
+    this.styles = styleConstructor(props.theme);
+    this.state = {
+      reservations: []
+    };
+    this.heights = [];
+    this.selectedDay = this.props.selectedDay;
+    this.scrollOver = true;
   }
 
-  componentWillUnmount() {
-    if (this.props.onRef != null) {
-      this.props.onRef(null);
+  componentWillMount() {
+    this.updateDataSource(this.getReservations(this.props).reservations);
+  }
+
+  updateDataSource(reservations) {
+    this.setState({
+      reservations
+    });
+  }
+
+  updateReservations(props) {
+    const reservations = this.getReservations(props);
+
+    if (this.list && !dateutils.sameDate(props.selectedDay, this.selectedDay)) {
+      let scrollPosition = 0;
+      for (let i = 0; i < reservations.scrollPosition; i++) {
+        scrollPosition += this.heights[i] || 0;
+      }
+      this.scrollOver = false;
+
+      // this.list.scrollToOffset({ offset: scrollPosition, animated: true });
+      this.list._wrapperListRef._listRef.scrollToOffset({ offset: scrollPosition, animated: true });
+      // this.list.scrollToLocation({
+      //   sectionIndex: 0,
+      //   itemIndex: scrollPosition,
+      //   viewOffset: 35, // get the user back to where they were
+      //   animated: true
+      // });
+    }
+    this.selectedDay = props.selectedDay;
+    this.updateDataSource(reservations.reservations);
+  }
+
+  componentWillReceiveProps(props) {
+    if (!dateutils.sameDate(props.initialDay, this.props.initialDay)) {
+      this.setState(
+        {
+          reservations: []
+        },
+        () => {
+          this.updateReservations(props);
+        }
+      );
+    } else {
+      this.updateReservations(props);
     }
   }
 
-  componentDidUpdate = (prevProps, prevState) => {
-    const oldSections = prevProps.sections;
-    const newSections = this.props.sections;
-
-    if (Array.isArray(oldSections) && Array.isArray(newSections)) {
-      if (!oldSections.length || !newSections.length) return;
-
-      // if items were added to start
-      if (!isEqual(oldSections[0], newSections[0])) {
-        const numAdded = newSections.length - oldSections.length;
-        // XXX probably not the safest way to do this but ¯\_(ツ)_/¯
-        const currentPos = get(this, '_listRef._wrapperListRef._listRef._scrollMetrics.offset');
-        // this._listRef.scrollToLocation({
-        //   sectionIndex: numAdded,
-        //   itemIndex: numAdded === 0 ? newSections[0].data.length - oldSections[0].data.length : 0,
-        //   viewOffset: 0, // get the user back to where they were
-        //   animated: false
-        // });
-      }
-    }
-  };
-
-  componentWillReceiveProps = nextProps => {
-    // console.log(nextProps);
-  };
-
-  render = () => (
-    <SectionList
-      {...this.props}
-      overScrollMode="never"
-      ref={ref => {
-        this._listRef = ref;
-        if (this.props.onRef) {
-          this.props.onRef(this._listRef);
-        }
-      }}
-      onLayout={this.onLayout}
-      onScroll={this.onScroll}
-      onMomentumScrollEnd={this.onMomentumScrollEnd}
-      onScrollBeginDrag={this.onScrollBeginDrag}
-      onEndReached={this.onEndReached}
-    />
-  );
-
-  onMomentumScrollEnd = e => {
-    if (e) {
-      const {
-        nativeEvent: {
-          contentOffset: { y }
-        }
-      } = e;
-    }
-
-    if (this.props.onMomentumScrollEnd) {
-      this.props.onMomentumScrollEnd(e);
-    }
-    this.onStartAlreadyCalled = false;
-  };
-
-  // reset the callback every time a user starts to drag
-  onScrollBeginDrag = e => {
-    if (this.props.onScrollBeginDrag) {
-      this.props.onScrollBeginDrag(e);
-    }
-    this.onStartAlreadyCalled = false;
-  };
-
-  onScroll = e => {
-    const {
-      nativeEvent: {
-        contentOffset: { y }
-      }
-    } = e;
-
+  onScroll(event) {
+    const yOffset = event.nativeEvent.contentOffset.y;
     if (this.props.onScroll && typeof this.props.onScroll === 'function') {
-      this.props.onScroll(e);
+      this.props.onScroll(yOffset);
+    }
+    let topRowOffset = 0;
+    let topRow;
+    for (topRow = 0; topRow < this.heights.length; topRow++) {
+      if (topRowOffset + this.heights[topRow] / 2 >= yOffset) {
+        break;
+      }
+      topRowOffset += this.heights[topRow];
+    }
+    const row = this.state.reservations[topRow];
+    if (!row) return;
+    const day = row.day;
+    const sameDate = dateutils.sameDate(day, this.selectedDay);
+    if (!sameDate && this.scrollOver) {
+      this.selectedDay = day.clone();
+      this.props.onDayChange(day.clone());
+      // this.scrollOver = false;
+    }
+  }
+
+  onRowLayoutChange(ind, event) {
+    this.heights[ind] = event.nativeEvent.layout.height;
+  }
+
+  renderRow({ item, index }) {
+    return (
+      <View onLayout={this.onRowLayoutChange.bind(this, index)}>
+        <Reservation
+          item={item}
+          renderItem={this.props.renderItem}
+          renderDay={this.props.renderDay}
+          renderEmptyDate={this.props.renderEmptyDate}
+          theme={this.props.theme}
+          rowHasChanged={this.props.rowHasChanged}
+        />
+      </View>
+    );
+  }
+
+  getReservationsForDay(iterator, props) {
+    const day = iterator.clone();
+    const res = props.reservations[day.toString('yyyy-MM-dd')];
+    if (res && res.length) {
+      return res.map((reservation, i) => {
+        return {
+          reservation,
+          date: i ? false : day,
+          day
+        };
+      });
+    } else if (res) {
+      return [
+        {
+          date: iterator.clone(),
+          day
+        }
+      ];
+    } else {
+      return false;
+    }
+  }
+
+  onListTouch() {
+    this.scrollOver = true;
+  }
+
+  getReservations(props) {
+    if (!props.reservations || !props.selectedDay) {
+      return { reservations: [], scrollPosition: 0 };
+    }
+    let reservations = [];
+
+    let scrollPosition = 0;
+
+    for (let i = 0; i < Object.keys(props.reservations).length; i++) {
+      const day = XDate(new Date(Object.keys(props.reservations)[i]));
+
+      if (day.getTime() < props.selectedDay.getTime()) {
+        scrollPosition++;
+      }
+
+      const res = this.getReservationsForDay(day, props);
+      if (!res) {
+        reservations = [];
+        break;
+      } else {
+        reservations = reservations.concat(res);
+      }
     }
 
-    // XXX probably not the safest way to do this but ¯\_(ツ)_/¯
-    const velocity = get(this, '_listRef._wrapperListRef._listRef._scrollMetrics.velocity');
+    return { reservations, scrollPosition };
+  }
 
-    if (
-      y <= this.startThreshold && // nearing the top
-      velocity < 0 && // scrolling _toward_ the top
-      !this.onStartAlreadyCalled && // hasn't been called this drag/momentum
-      typeof this.props.onStartReached === 'function'
-    ) {
-      this.onStartAlreadyCalled = true;
-      this.props.onStartReached();
+  render() {
+    if (!this.props.reservations) {
+      if (this.props.renderEmptyData) {
+        return this.props.renderEmptyData();
+      }
+      return <ActivityIndicator style={{ marginTop: 80 }} />;
     }
-  };
 
-  onEndReached = e => {
-    if (
-      !this.onStartAlreadyCalled // hasn't been called this drag/momentum
-    ) {
-      this.onStartAlreadyCalled = true;
-      this.props.onEndReached();
-    }
-  };
-
-  onLayout = e => {
-    const { height } = e.nativeEvent.layout;
-    const { onLayout, onStartReachedThreshold } = this.props;
-
-    onLayout ? onLayout(e) : null;
-
-    const threshold = onStartReachedThreshold ? onStartReachedThreshold : 0;
-    this.startThreshold = height * threshold;
-  };
+    return (
+      <TwoWaySectionList
+        onRef={c => (this.list = c)}
+        style={this.props.style}
+        contentContainerStyle={this.styles.content}
+        renderItem={this.renderRow.bind(this)}
+        sections={[
+          {
+            title: 'reservations',
+            data: this.state.reservations
+          }
+        ]}
+        getItemLayout={(data, index) => ({ length: 200, offset: 0, index })}
+        onScroll={this.onScroll.bind(this)}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={200}
+        onMoveShouldSetResponderCapture={() => {
+          this.onListTouch();
+          return false;
+        }}
+        keyExtractor={(item, index) => String(index)}
+        refreshControl={this.props.refreshControl}
+        refreshing={this.props.refreshing || false}
+        onRefresh={this.props.onRefresh}
+        onStartReachedThreshold={0.01}
+        onEndReachedThreshold={0.01}
+        onStartReached={this.props.onStartReached}
+        onEndReached={this.props.onEndReached}
+      />
+    );
+  }
 }
+
+export default ReactComp;
