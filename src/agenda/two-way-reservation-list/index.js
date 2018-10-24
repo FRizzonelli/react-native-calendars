@@ -1,12 +1,11 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import TwoWaySectionList from './two-way-section-list';
-import Reservation from './reservation';
-import PropTypes from 'prop-types';
 import XDate from 'xdate';
-
 import dateutils from '../../dateutils';
+import Reservation from './reservation';
 import styleConstructor from './style';
+import TwoWaySectionList from './two-way-section-list';
 
 class ReactComp extends Component {
   static propTypes = {
@@ -60,7 +59,11 @@ class ReactComp extends Component {
   updateReservations(props) {
     const reservations = this.getReservations(props);
 
-    if (this.list && !dateutils.sameDate(props.selectedDay, this.selectedDay)) {
+    if (
+      this.list &&
+      (!dateutils.sameDate(props.selectedDay, this.selectedDay) ||
+        this.state.reservations.length < reservations.reservations.length)
+    ) {
       let scrollPosition = 0;
       for (let i = 0; i < reservations.scrollPosition; i++) {
         scrollPosition += this.heights[i] || 0;
@@ -68,7 +71,7 @@ class ReactComp extends Component {
       this.scrollOver = false;
 
       // this.list.scrollToOffset({ offset: scrollPosition, animated: true });
-      this.list._wrapperListRef._listRef.scrollToOffset({ offset: scrollPosition, animated: true });
+      this.list._wrapperListRef._listRef.scrollToOffset({ offset: scrollPosition, animated: false });
       // this.list.scrollToLocation({
       //   sectionIndex: 0,
       //   itemIndex: scrollPosition,
@@ -177,7 +180,7 @@ class ReactComp extends Component {
       const day = XDate(new Date(Object.keys(props.reservations)[i]));
 
       if (day.getTime() < props.selectedDay.getTime()) {
-        scrollPosition++;
+        scrollPosition += props.reservations[Object.keys(props.reservations)[i]].length;
       }
 
       const res = this.getReservationsForDay(day, props);
