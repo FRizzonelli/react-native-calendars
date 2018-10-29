@@ -228,8 +228,12 @@ class ReactComp extends Component {
         onRefresh={this.props.onRefresh}
         onStartReachedThreshold={0.01}
         onEndReachedThreshold={0.01}
-        onStartReached={this.props.onStartReached}
-        onEndReached={this.props.onEndReached}
+        onStartReached={
+          this.state.calendarIsReady ? this.props.onStartReached : () => {}
+        }
+        onEndReached={
+          this.state.calendarIsReady ? this.props.onEndReached : () => {}
+        }
       />
     );
   }
