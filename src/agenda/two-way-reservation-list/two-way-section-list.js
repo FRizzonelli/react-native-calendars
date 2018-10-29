@@ -1,7 +1,7 @@
+import get from 'lodash.get';
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { SectionList, View, ViewPropTypes } from 'react-native';
-import PropTypes from 'prop-types';
-import get from 'lodash.get';
 
 const viewPropTypes = ViewPropTypes || View.propTypes;
 
@@ -29,28 +29,6 @@ export default class extends Component {
     this.onStartAlreadyCalled = false; // called already for a drag/momentum
     this.secList = null;
   }
-
-  // componentDidUpdate = (prevProps) => {
-  //   const oldSections = prevProps.sections;
-  //   const newSections = this.props.sections;
-
-  //   if (Array.isArray(oldSections) && Array.isArray(newSections)) {
-  //     if (!oldSections.length || !newSections.length) return;
-
-  //     // if items were added to start
-  //     if (!isEqual(oldSections[0], newSections[0])) {
-  //       const numAdded = newSections.length - oldSections.length;
-  //       // XXX probably not the safest way to do this but ¯\_(ツ)_/¯
-  //       const currentPos = get(this, '_listRef._wrapperListRef._listRef._scrollMetrics.offset');
-  //       // this._listRef.scrollToLocation({
-  //       //   sectionIndex: numAdded,
-  //       //   itemIndex: numAdded === 0 ? newSections[0].data.length - oldSections[0].data.length : 0,
-  //       //   viewOffset: 0, // get the user back to where they were
-  //       //   animated: false
-  //       // });
-  //     }
-  //   }
-  // };
 
   render() {
     const { onScrollHandler, onListTouch, onEndReached, ...rest } = this.props;
@@ -90,26 +68,21 @@ export default class extends Component {
     });
   };
 
-  onMomentumScrollEnd = () => {
-    // if (e) {
-    //   const {
-    //     nativeEvent: {
-    //       contentOffset: { y }
-    //     }
-    //   } = e;
-    // }
+  scrollToSectionAndItem = (section, item) => {
+    this.secList.scrollToLocation({
+      sectionIndex: section,
+      itemIndex: item,
+      viewOffset: 0, // get the user back to where they were
+      animated: true
+    });
+  };
 
-    // if (this.props.onMomentumScrollEnd) {
-    //   this.props.onMomentumScrollEnd(e);
-    // }
+  onMomentumScrollEnd = () => {
     this.onStartAlreadyCalled = false;
   };
 
   // reset the callback every time a user starts to drag
   onScrollBeginDrag = () => {
-    // if (this.props.onScrollBeginDrag) {
-    //   this.props.onScrollBeginDrag(e);
-    // }
     this.onStartAlreadyCalled = false;
   };
 
@@ -125,10 +98,7 @@ export default class extends Component {
     }
 
     // XXX probably not the safest way to do this but ¯\_(ツ)_/¯
-    const velocity = get(
-      this,
-      '_listRef._wrapperListRef._listRef._scrollMetrics.velocity'
-    );
+    const velocity = get(this, '_listRef._wrapperListRef._listRef._scrollMetrics.velocity');
 
     if (
       y <= this.startThreshold && // nearing the top

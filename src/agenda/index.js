@@ -40,6 +40,8 @@ export default class AgendaView extends Component {
     renderItem: PropTypes.func,
     // specify how each date should be rendered. day can be undefined if the item is not first in that day.
     renderDay: PropTypes.func,
+    // specify how each date header should be rendered
+    renderHeader: PropTypes.func,
     // specify how agenda knob should look like
     renderKnob: PropTypes.func,
     // specify how empty date content with no items should be rendered
@@ -280,6 +282,7 @@ export default class AgendaView extends Component {
       <ReservationsList
         rowHasChanged={this.props.rowHasChanged}
         renderItem={this.props.renderItem}
+        renderHeader={this.props.renderHeader}
         renderDay={this.props.renderDay}
         renderEmptyDate={this.props.renderEmptyDate}
         reservations={this.props.items}
@@ -287,10 +290,8 @@ export default class AgendaView extends Component {
         renderEmptyData={this.props.renderEmptyData}
         initialDay={this.state.topDay}
         onDayChange={this.onDayChange.bind(this)}
-        // onScroll={e => {}}
         onStartReached={this.props.onStartReached}
         onEndReached={this.props.onEndReached}
-        // ref={c => (this.list = c)}
         theme={this.props.theme}
       />
     );

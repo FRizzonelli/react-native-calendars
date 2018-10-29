@@ -1,13 +1,15 @@
-import groupBy from "lodash.groupby";
-import map from "lodash.map";
-import PropTypes from "prop-types";
-import React, { Component } from "react";
-import { ActivityIndicator, View } from "react-native";
-import XDate from "xdate";
-import dateutils from "../../dateutils";
-import Reservation from "./reservation";
-import styleConstructor from "./style";
-import TwoWaySectionList from "./two-way-section-list";
+import groupBy from 'lodash.groupby';
+import map from 'lodash.map';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import XDate from 'xdate';
+import dateutils from '../../dateutils';
+import Reservation from './reservation';
+import styleConstructor from './style';
+import TwoWaySectionList from './two-way-section-list';
+
+const ITEM_HEIGHT = 96;
 
 class ReactComp extends Component {
   static propTypes = {
@@ -17,6 +19,8 @@ class ReactComp extends Component {
     renderItem: PropTypes.func,
     // specify how each date should be rendered. day can be undefined if the item is not first in that day.
     renderDay: PropTypes.func,
+    // specify how each header date should be rendered
+    renderHeader: PropTypes.func,
     // specify how empty date content with no items should be rendered
     renderEmptyDate: PropTypes.func,
     // callback that gets called when day changes while scrolling agenda list
@@ -67,20 +71,9 @@ class ReactComp extends Component {
       (!dateutils.sameDate(props.selectedDay, this.selectedDay) ||
         this.state.reservations.length < reservations.reservations.length)
     ) {
-      let scrollPosition = 0;
-      for (let i = 0; i < reservations.scrollPosition; i++) {
-        scrollPosition += this.heights[i] || 0;
-      }
       this.scrollOver = false;
 
-      // this.list.scrollToOffset({ offset: scrollPosition, animated: true });
-      this.twoWayList.scrollToOffset(scrollPosition);
-      // this.list.scrollToLocation({
-      //   sectionIndex: 0,
-      //   itemIndex: scrollPosition,
-      //   viewOffset: 35, // get the user back to where they were
-      //   animated: true
-      // });
+      this.twoWayList.scrollToOffset(reservations.scrollPosition * ITEM_HEIGHT + reservations.sectionIndex * 36);
     }
     this.selectedDay = props.selectedDay;
     this.updateDataSource(reservations.reservations);
@@ -103,16 +96,16 @@ class ReactComp extends Component {
 
   onScrollHandler(event) {
     const yOffset = event.nativeEvent.contentOffset.y;
-    if (this.props.onScroll && typeof this.props.onScroll === "function") {
+    if (this.props.onScroll && typeof this.props.onScroll === 'function') {
       this.props.onScroll(yOffset);
     }
     let topRowOffset = 0;
     let topRow;
-    for (topRow = 0; topRow < this.heights.length; topRow++) {
-      if (topRowOffset + this.heights[topRow] / 2 >= yOffset) {
+    for (topRow = 0; topRow < this.state.reservations.length; topRow++) {
+      if (topRowOffset + ITEM_HEIGHT / 2 >= yOffset) {
         break;
       }
-      topRowOffset += this.heights[topRow];
+      topRowOffset += ITEM_HEIGHT;
     }
     const row = this.state.reservations[topRow];
     if (!row) return;
@@ -125,13 +118,9 @@ class ReactComp extends Component {
     }
   }
 
-  onRowLayoutChange(ind, event) {
-    this.heights[ind] = event.nativeEvent.layout.height;
-  }
-
-  renderRow({ item, index }) {
+  renderRow({ item }) {
     return (
-      <View onLayout={this.onRowLayoutChange.bind(this, index)}>
+      <View>
         <Reservation
           item={item}
           renderItem={this.props.renderItem}
@@ -146,7 +135,7 @@ class ReactComp extends Component {
 
   getReservationsForDay(iterator, props) {
     const day = iterator.clone();
-    const res = props.reservations[day.toString("yyyy-MM-dd")];
+    const res = props.reservations[day.toString('yyyy-MM-dd')];
     if (res && res.length) {
       return res.map((reservation, i) => {
         return {
@@ -173,18 +162,22 @@ class ReactComp extends Component {
 
   getReservations(props) {
     if (!props.reservations || !props.selectedDay) {
-      return { reservations: [], scrollPosition: 0 };
+      return { reservations: [], sectionIndex: 0, scrollPosition: 0 };
     }
     let reservations = [];
 
     let scrollPosition = 0;
+    let sectionIndex = null;
 
     for (let i = 0; i < Object.keys(props.reservations).length; i++) {
       const day = XDate(new Date(Object.keys(props.reservations)[i]));
 
       if (day.getTime() < props.selectedDay.getTime()) {
-        scrollPosition +=
-          props.reservations[Object.keys(props.reservations)[i]].length;
+        scrollPosition += props.reservations[Object.keys(props.reservations)[i]].length;
+      } else {
+        if (sectionIndex === null) {
+          sectionIndex = i;
+        }
       }
 
       const res = this.getReservationsForDay(day, props);
@@ -196,7 +189,7 @@ class ReactComp extends Component {
       }
     }
 
-    return { reservations, scrollPosition };
+    return { reservations, sectionIndex, scrollPosition };
   }
 
   render() {
@@ -215,6 +208,7 @@ class ReactComp extends Component {
         style={this.props.style}
         contentContainerStyle={this.styles.content}
         renderItem={this.renderRow.bind(this)}
+        renderSectionHeader={section => this.props.renderHeader(section)}
         sections={sections}
         getItemLayout={(data, index) => ({ length: 96, offset: 0, index })}
         onScrollHandler={this.onScrollHandler.bind(this)}
@@ -235,7 +229,7 @@ class ReactComp extends Component {
 
   getSectionsByDay(reservations) {
     const groupedData = groupBy(reservations, reservation => {
-      reservation.date.toString('dd/MM/yyyy');
+      return reservation.day.toString('dd/MM/yyyy');
     });
 
     return map(groupedData, (group, day) => {
