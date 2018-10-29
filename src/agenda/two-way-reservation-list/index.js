@@ -1,3 +1,4 @@
+import groupBy from 'lodash.groupby';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ActivityIndicator, View } from 'react-native';
@@ -231,6 +232,10 @@ class ReactComp extends Component {
   }
 
   getSectionsByDay(reservations) {
+    const groupedData = groupBy(reservations, reservation => {
+      reservation.date;
+    });
+
     return [
       {
         title: 'reservations',
