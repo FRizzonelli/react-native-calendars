@@ -235,7 +235,7 @@ class ReactComp extends Component {
 
   getSectionsByDay(reservations) {
     const groupedData = groupBy(reservations, reservation => {
-      reservation.date;
+      reservation.date.toString('dd/MM/yyyy');
     });
 
     return map(groupedData, (group, day) => {
