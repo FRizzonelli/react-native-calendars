@@ -1,12 +1,13 @@
-import groupBy from 'lodash.groupby';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import XDate from 'xdate';
-import dateutils from '../../dateutils';
-import Reservation from './reservation';
-import styleConstructor from './style';
-import TwoWaySectionList from './two-way-section-list';
+import groupBy from "lodash.groupby";
+import map from "lodash.map";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { ActivityIndicator, View } from "react-native";
+import XDate from "xdate";
+import dateutils from "../../dateutils";
+import Reservation from "./reservation";
+import styleConstructor from "./style";
+import TwoWaySectionList from "./two-way-section-list";
 
 class ReactComp extends Component {
   static propTypes = {
@@ -102,7 +103,7 @@ class ReactComp extends Component {
 
   onScrollHandler(event) {
     const yOffset = event.nativeEvent.contentOffset.y;
-    if (this.props.onScroll && typeof this.props.onScroll === 'function') {
+    if (this.props.onScroll && typeof this.props.onScroll === "function") {
       this.props.onScroll(yOffset);
     }
     let topRowOffset = 0;
@@ -145,7 +146,7 @@ class ReactComp extends Component {
 
   getReservationsForDay(iterator, props) {
     const day = iterator.clone();
-    const res = props.reservations[day.toString('yyyy-MM-dd')];
+    const res = props.reservations[day.toString("yyyy-MM-dd")];
     if (res && res.length) {
       return res.map((reservation, i) => {
         return {
@@ -182,7 +183,8 @@ class ReactComp extends Component {
       const day = XDate(new Date(Object.keys(props.reservations)[i]));
 
       if (day.getTime() < props.selectedDay.getTime()) {
-        scrollPosition += props.reservations[Object.keys(props.reservations)[i]].length;
+        scrollPosition +=
+          props.reservations[Object.keys(props.reservations)[i]].length;
       }
 
       const res = this.getReservationsForDay(day, props);
@@ -236,12 +238,12 @@ class ReactComp extends Component {
       reservation.date;
     });
 
-    return [
-      {
-        title: 'reservations',
-        data: reservations
-      }
-    ];
+    return map(groupedData, (group, day) => {
+      return {
+        title: day,
+        data: group
+      };
+    });
   }
 }
 
