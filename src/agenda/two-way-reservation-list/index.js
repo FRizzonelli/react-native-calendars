@@ -213,14 +213,11 @@ class ReactComp extends Component {
         contentContainerStyle={this.styles.content}
         renderItem={this.renderRow.bind(this)}
         sections={sections}
-        getItemLayout={(data, index) => ({ length: 200, offset: 0, index })}
+        getItemLayout={(data, index) => ({ length: 96, offset: 0, index })}
         onScrollHandler={this.onScrollHandler.bind(this)}
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={200}
-        onMoveShouldSetResponderCapture={() => {
-          this.onListTouch();
-          return false;
-        }}
+        onListTouch={this.onListTouch.bind(this)}
         keyExtractor={(item, index) => String(index)}
         refreshControl={this.props.refreshControl}
         refreshing={this.props.refreshing || false}

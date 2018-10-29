@@ -18,6 +18,7 @@ export default class extends Component {
     onEndReachedThreshold: PropTypes.number,
     onEndReached: PropTypes.func,
     onScrollHandler: PropTypes.func,
+    onListTouch: PropTypes.func,
     sections: PropTypes.array
   };
 
@@ -63,7 +64,7 @@ export default class extends Component {
         overScrollMode="never"
         getItemLayout={(data, index) => ({ length: 96, offset: 0, index })}
         onMoveShouldSetResponderCapture={() => {
-          this.props.onListTouch();
+          onListTouch();
           return false;
         }}
         keyExtractor={(item, index) => {
