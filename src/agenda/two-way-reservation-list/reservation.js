@@ -59,9 +59,9 @@ class ReservationListItem extends Component {
     } else {
       content = this.props.renderEmptyDate(date);
     }
+    // {this.renderDate(date, reservation)}
     return (
       <View style={this.styles.container}>
-        {this.renderDate(date, reservation)}
         <View style={{flex:1}}>
           {content}
         </View>

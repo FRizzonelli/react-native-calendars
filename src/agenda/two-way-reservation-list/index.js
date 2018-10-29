@@ -44,6 +44,7 @@ class ReactComp extends Component {
     this.heights = [];
     this.selectedDay = this.props.selectedDay;
     this.scrollOver = true;
+    this.twoWayList = null;
   }
 
   componentWillMount() {
@@ -60,7 +61,7 @@ class ReactComp extends Component {
     const reservations = this.getReservations(props);
 
     if (
-      this.list &&
+      this.twoWayList &&
       (!dateutils.sameDate(props.selectedDay, this.selectedDay) ||
         this.state.reservations.length < reservations.reservations.length)
     ) {
@@ -71,7 +72,7 @@ class ReactComp extends Component {
       this.scrollOver = false;
 
       // this.list.scrollToOffset({ offset: scrollPosition, animated: true });
-      this.list._wrapperListRef._listRef.scrollToOffset({ offset: scrollPosition, animated: false });
+      this.twoWayList.scrollToOffset(scrollPosition);
       // this.list.scrollToLocation({
       //   sectionIndex: 0,
       //   itemIndex: scrollPosition,
@@ -98,7 +99,7 @@ class ReactComp extends Component {
     }
   }
 
-  onScroll(event) {
+  onScrollHandler(event) {
     const yOffset = event.nativeEvent.contentOffset.y;
     if (this.props.onScroll && typeof this.props.onScroll === 'function') {
       this.props.onScroll(yOffset);
@@ -203,20 +204,17 @@ class ReactComp extends Component {
       return <ActivityIndicator style={{ marginTop: 80 }} />;
     }
 
+    const sections = this.getSectionsByDay(this.state.reservations);
+
     return (
       <TwoWaySectionList
-        onRef={c => (this.list = c)}
+        onRef={c => (this.twoWayList = c)}
         style={this.props.style}
         contentContainerStyle={this.styles.content}
         renderItem={this.renderRow.bind(this)}
-        sections={[
-          {
-            title: 'reservations',
-            data: this.state.reservations
-          }
-        ]}
+        sections={sections}
         getItemLayout={(data, index) => ({ length: 200, offset: 0, index })}
-        onScroll={this.onScroll.bind(this)}
+        onScrollHandler={this.onScrollHandler.bind(this)}
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={200}
         onMoveShouldSetResponderCapture={() => {
@@ -233,6 +231,15 @@ class ReactComp extends Component {
         onEndReached={this.props.onEndReached}
       />
     );
+  }
+
+  getSectionsByDay(reservations) {
+    return [
+      {
+        title: 'reservations',
+        data: reservations
+      }
+    ];
   }
 }
 

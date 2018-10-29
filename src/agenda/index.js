@@ -1,14 +1,13 @@
-import React, { Component } from 'react';
-import { Text, View, Dimensions, Animated, ViewPropTypes } from 'react-native';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { Animated, Dimensions, Text, View, ViewPropTypes } from 'react-native';
 import XDate from 'xdate';
-
-import { parseDate, xdateToData } from '../interface';
-import dateutils from '../dateutils';
 import CalendarList from '../calendar-list';
-import ReservationsList from './two-way-reservation-list';
-import styleConstructor from './style';
+import dateutils from '../dateutils';
 import { VelocityTracker } from '../input';
+import { parseDate, xdateToData } from '../interface';
+import styleConstructor from './style';
+import ReservationsList from './two-way-reservation-list';
 
 const HEADER_HEIGHT = 104;
 const KNOB_HEIGHT = 24;
@@ -262,9 +261,9 @@ export default class AgendaView extends Component {
       this.props.onCalendarToggled(false);
     }
     if (!optimisticScroll) {
-      this.setState({
-        topDay: day.clone()
-      });
+      // this.setState({
+      //   topDay: day.clone()
+      // });
     }
     this.setScrollPadPosition(this.initialScrollPadPosition(), true);
     this.calendar.scrollToDay(day, this.calendarOffset(), true);
@@ -288,10 +287,10 @@ export default class AgendaView extends Component {
         renderEmptyData={this.props.renderEmptyData}
         initialDay={this.state.topDay}
         onDayChange={this.onDayChange.bind(this)}
-        onScroll={() => {}}
+        // onScroll={e => {}}
         onStartReached={this.props.onStartReached}
         onEndReached={this.props.onEndReached}
-        ref={c => (this.list = c)}
+        // ref={c => (this.list = c)}
         theme={this.props.theme}
       />
     );
@@ -407,6 +406,7 @@ export default class AgendaView extends Component {
               minDate={this.props.minDate}
               maxDate={this.props.maxDate}
               current={this.currentMonth}
+              scrollsToTop={false}
               markedDates={this.generateMarkings()}
               markingType={this.props.markingType}
               removeClippedSubviews={this.props.removeClippedSubviews}
@@ -441,7 +441,7 @@ export default class AgendaView extends Component {
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           style={scrollPadStyle}
-          scrollEventThrottle={1}
+          scrollEventThrottle={200}
           scrollsToTop={false}
           onTouchStart={this.onTouchStart}
           onTouchEnd={this.onTouchEnd}
