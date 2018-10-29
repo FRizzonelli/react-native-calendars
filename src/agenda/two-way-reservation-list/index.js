@@ -1,7 +1,7 @@
-import groupBy from 'lodash.groupby';
-import uniqBy from 'lodash.uniqby';
-import map from 'lodash.map';
 import findIndex from 'lodash.findindex';
+import groupBy from 'lodash.groupby';
+import map from 'lodash.map';
+import uniqBy from 'lodash.uniqby';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ActivityIndicator, View } from 'react-native';
@@ -102,19 +102,17 @@ class ReactComp extends Component {
     if (this.props.onScroll && typeof this.props.onScroll === 'function') {
       this.props.onScroll(yOffset);
     }
-    let topRowOffset = SECTION_HEIGHT * findIndex(uniqBy(map(this.state.reservations, r => r.day), day));
+    const keys = uniqBy(map(this.state.reservations, r => r.day), day);
+    
+    let topRowOffset = 0;
     let topRow;
-    let lastDay;
     for (topRow = 0; topRow < this.state.reservations.length; topRow++) {
-      if (topRowOffset + ITEM_HEIGHT / 2 >= yOffset) {
+      const found = findIndex(keys, this.state.reservations[topRow].day);
+      if (topRowOffset + ITEM_HEIGHT / 2 + SECTION_HEIGHT * found >= yOffset) {
+        topRowOffset += SECTION_HEIGHT * found;
         break;
       }
       topRowOffset += ITEM_HEIGHT;
-
-      if (lastDay === undefined || this.state.reservations[topRow].day > lastDay) {
-        topRowOffset += SECTION_HEIGHT;
-      }
-      lastDay = this.state.reservations[topRow];
     }
     const row = this.state.reservations[topRow];
     if (!row) return;
