@@ -289,6 +289,7 @@ export default class AgendaView extends Component {
         selectedDay={this.state.selectedDay}
         renderEmptyData={this.props.renderEmptyData}
         initialDay={this.state.topDay}
+        calendarIsReady={this.state.calendarIsReady}
         onDayChange={this.onDayChange.bind(this)}
         onStartReached={this.props.onStartReached}
         onEndReached={this.props.onEndReached}

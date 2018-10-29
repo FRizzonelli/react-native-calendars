@@ -41,6 +41,7 @@ class ReactComp extends Component {
     initialDay: PropTypes.instanceOf(XDate),
     refreshControl: PropTypes.element,
     refreshing: PropTypes.bool,
+    calendarIsReady: PropTypes.bool,
     onRefresh: PropTypes.func
   };
 
@@ -229,10 +230,10 @@ class ReactComp extends Component {
         onStartReachedThreshold={0.01}
         onEndReachedThreshold={0.01}
         onStartReached={
-          this.state.calendarIsReady ? this.props.onStartReached : () => {}
+          this.props.calendarIsReady ? this.props.onStartReached : () => {}
         }
         onEndReached={
-          this.state.calendarIsReady ? this.props.onEndReached : () => {}
+          this.props.calendarIsReady ? this.props.onEndReached : () => {}
         }
       />
     );
