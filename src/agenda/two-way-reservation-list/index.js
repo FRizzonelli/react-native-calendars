@@ -77,7 +77,10 @@ class ReactComp extends Component {
     ) {
       this.scrollOver = false;
 
-      this.twoWayList.scrollToOffset(reservations.scrollPosition * ITEM_HEIGHT + reservations.sectionIndex * 36);
+      this.twoWayList.scrollToOffset(
+        reservations.scrollPosition * ITEM_HEIGHT + reservations.sectionIndex * 36,
+        this.state.reservations.length === reservations.reservations.length
+      );
     }
     this.selectedDay = props.selectedDay;
     this.updateDataSource(reservations.reservations);
@@ -104,7 +107,7 @@ class ReactComp extends Component {
       this.props.onScroll(yOffset);
     }
     const keys = uniqBy(map(this.state.reservations, r => r.day), day);
-    
+
     let topRowOffset = 0;
     let topRow;
     for (topRow = 0; topRow < this.state.reservations.length; topRow++) {
@@ -229,12 +232,8 @@ class ReactComp extends Component {
         onRefresh={this.props.onRefresh}
         onStartReachedThreshold={0.01}
         onEndReachedThreshold={0.01}
-        onStartReached={
-          this.props.calendarIsReady ? this.props.onStartReached : () => {}
-        }
-        onEndReached={
-          this.props.calendarIsReady ? this.props.onEndReached : () => {}
-        }
+        onStartReached={this.props.calendarIsReady ? this.props.onStartReached : () => {}}
+        onEndReached={this.props.calendarIsReady ? this.props.onEndReached : () => {}}
       />
     );
   }

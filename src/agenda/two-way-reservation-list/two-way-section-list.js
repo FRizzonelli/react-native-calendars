@@ -61,10 +61,10 @@ export default class extends Component {
     );
   }
 
-  scrollToOffset = offset => {
+  scrollToOffset = (offset, animated) => {
     this.secList._wrapperListRef._listRef.scrollToOffset({
       offset,
-      animated: true
+      animated
     });
   };
 
