@@ -208,7 +208,7 @@ class ReactComp extends Component {
 
     return (
       <TwoWaySectionList
-        onRef={c => (this.twoWayList = c)}
+        ref={c => (this.twoWayList = c)}
         style={this.props.style}
         contentContainerStyle={this.styles.content}
         renderItem={this.renderRow.bind(this)}
