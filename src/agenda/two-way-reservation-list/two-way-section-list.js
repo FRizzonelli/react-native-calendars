@@ -98,7 +98,7 @@ export default class extends Component {
     }
 
     // XXX probably not the safest way to do this but ¯\_(ツ)_/¯
-    const velocity = get(this, '_listRef._wrapperListRef._listRef._scrollMetrics.velocity');
+    const velocity = get(this, 'secList._wrapperListRef._listRef._scrollMetrics.velocity');
 
     if (
       y <= this.startThreshold && // nearing the top
