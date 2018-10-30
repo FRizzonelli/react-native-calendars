@@ -1,7 +1,7 @@
 import get from 'lodash.get';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { SectionList, View, ViewPropTypes } from 'react-native';
+import { Platform, SectionList, View, ViewPropTypes } from 'react-native';
 
 const viewPropTypes = ViewPropTypes || View.propTypes;
 
@@ -139,6 +139,6 @@ export default class extends Component {
     const threshold = onStartReachedThreshold ? onStartReachedThreshold : 0;
     const endThreshold = onEndReachedThreshold ? onEndReachedThreshold : 0;
     this.startThreshold = height * threshold;
-    this.endThreshold = height * endThreshold;
+    this.endThreshold = Platform.select({android: (height + 200) * endThreshold, ios: height * endThreshold});
   };
 }
