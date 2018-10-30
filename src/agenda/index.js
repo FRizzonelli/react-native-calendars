@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Animated, Dimensions, Text, View, ViewPropTypes } from 'react-native';
+import { ActivityIndicator, Animated, Dimensions, Text, View, ViewPropTypes } from 'react-native';
 import XDate from 'xdate';
 import CalendarList from '../calendar-list';
 import dateutils from '../dateutils';
@@ -48,8 +48,8 @@ export default class AgendaView extends Component {
     renderEmptyDay: PropTypes.func,
     // specify what should be rendered instead of ActivityIndicator
     renderEmptyData: PropTypes.func,
-    // specify custom component for reservation list
-    renderCustomComponent: PropTypes.func,
+    // custom more loader
+    renderCustomLoader: PropTypes.func,
     // specify your item comparison function for increased performance
     rowHasChanged: PropTypes.func,
 
@@ -89,6 +89,8 @@ export default class AgendaView extends Component {
     refreshing: PropTypes.bool,
     // Display loading indicador. Default = false
     displayLoadingIndicator: PropTypes.bool,
+    displayLoadingIndicatorStart: PropTypes.bool,
+    displayLoadingIndicatorEnd: PropTypes.bool,
     onStartReached: PropTypes.func,
     onEndReached: PropTypes.func
   };
@@ -298,6 +300,14 @@ export default class AgendaView extends Component {
     );
   }
 
+  renderLoader() {
+    if (this.props.renderCustomLoader) {
+      return this.props.renderCustomLoader();
+    } else {
+      return <ActivityIndicator />;
+    }
+  }
+
   onDayChange(day) {
     const newDate = parseDate(day);
     const withAnimation = dateutils.sameMonth(newDate, this.state.selectedDay);
@@ -394,7 +404,9 @@ export default class AgendaView extends Component {
     return (
       <View onLayout={this.onLayout} style={[this.props.style, { flex: 1, overflow: 'hidden' }]}>
         <View style={this.styles.reservations}>
-          {this.props.renderCustomComponent ? this.props.renderCustomComponent() : this.renderReservations()}
+          {this.props.displayLoadingIndicatorStart && this.renderLoader()}
+          {this.renderReservations()}
+          {this.props.displayLoadingIndicatorEnd && this.renderLoader()}
         </View>
         <Animated.View style={headerStyle}>
           <Animated.View style={{ flex: 1, transform: [{ translateY: contentTranslate }] }}>

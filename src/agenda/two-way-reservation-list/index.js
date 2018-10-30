@@ -231,7 +231,7 @@ class ReactComp extends Component {
         refreshing={this.props.refreshing || false}
         onRefresh={this.props.onRefresh}
         onStartReachedThreshold={0.01}
-        onEndReachedThreshold={0.01}
+        onEndReachedThreshold={0.98}
         onStartReached={this.props.calendarIsReady ? this.props.onStartReached : () => {}}
         onEndReached={this.props.calendarIsReady ? this.props.onEndReached : () => {}}
       />

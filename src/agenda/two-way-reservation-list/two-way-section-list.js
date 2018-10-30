@@ -26,6 +26,7 @@ export default class extends Component {
     super(props);
     this.state = {};
     this.startThreshold = 0; // px from top onStartReached will be called
+    this.endThreshold = 600; // px from top onStartReached will be called
     this.onStartAlreadyCalled = false; // called already for a drag/momentum
     this.secList = null;
   }
@@ -54,9 +55,9 @@ export default class extends Component {
         onScroll={this.onScroll}
         onMomentumScrollEnd={this.onMomentumScrollEnd}
         onScrollBeginDrag={this.onScrollBeginDrag}
-        onEndReached={this.onEndReached}
-        onStartReachedThreshold={0.01}
-        onEndReachedThreshold={0.01}
+        // onEndReached={this.onEndReached}
+        // onStartReachedThreshold={0.01}
+        // onEndReachedThreshold={0.01}
       />
     );
   }
@@ -99,6 +100,7 @@ export default class extends Component {
 
     // XXX probably not the safest way to do this but ¯\_(ツ)_/¯
     const velocity = get(this, 'secList._wrapperListRef._listRef._scrollMetrics.velocity');
+    const contentLength = get(this, 'secList._wrapperListRef._listRef._scrollMetrics.contentLength');
 
     if (
       y <= this.startThreshold && // nearing the top
@@ -108,25 +110,35 @@ export default class extends Component {
     ) {
       this.onStartAlreadyCalled = true;
       this.props.onStartReached();
-    }
-  };
-
-  onEndReached = () => {
-    if (
-      !this.onStartAlreadyCalled // hasn't been called this drag/momentum
+    } else if (
+      y >= contentLength - this.endThreshold && // nearing the top
+      velocity > 0 && // scrolling _toward_ the top
+      !this.onStartAlreadyCalled && // hasn't been called this drag/momentum
+      typeof this.props.onEndReached === 'function'
     ) {
       this.onStartAlreadyCalled = true;
       this.props.onEndReached();
     }
   };
 
+  // onEndReached = () => {
+  //   if (
+  //     !this.onStartAlreadyCalled // hasn't been called this drag/momentum
+  //   ) {
+  //     this.onStartAlreadyCalled = true;
+  //     this.props.onEndReached();
+  //   }
+  // };
+
   onLayout = e => {
     const { height } = e.nativeEvent.layout;
-    const { onLayout, onStartReachedThreshold } = this.props;
+    const { onLayout, onStartReachedThreshold, onEndReachedThreshold } = this.props;
 
     onLayout ? onLayout(e) : null;
 
     const threshold = onStartReachedThreshold ? onStartReachedThreshold : 0;
+    const endThreshold = onEndReachedThreshold ? onEndReachedThreshold : 0;
     this.startThreshold = height * threshold;
+    this.endThreshold = height * endThreshold;
   };
 }
