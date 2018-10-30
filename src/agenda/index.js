@@ -403,7 +403,7 @@ export default class AgendaView extends Component {
 
     return (
       <View onLayout={this.onLayout} style={[this.props.style, { flex: 1, overflow: 'hidden' }]}>
-        <View style={this.styles.reservations}>
+      <View style={[this.styles.reservations, this.props.displayLoadingIndicatorEnd && { marginTop: 24 }]}>
           {this.props.displayLoadingIndicatorStart && this.renderLoader()}
           {this.renderReservations()}
           {this.props.displayLoadingIndicatorEnd && this.renderLoader()}
