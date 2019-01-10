@@ -401,12 +401,12 @@ export default class AgendaView extends Component {
       );
     }
 
+    // {this.props.displayLoadingIndicatorStart && this.renderLoader()}
+    // {this.props.displayLoadingIndicatorEnd && this.renderLoader()}
     return (
       <View onLayout={this.onLayout} style={[this.props.style, { flex: 1, overflow: 'hidden' }]}>
       <View style={[this.styles.reservations, this.props.displayLoadingIndicatorEnd && { marginTop: 24 }]}>
-          {this.props.displayLoadingIndicatorStart && this.renderLoader()}
           {this.renderReservations()}
-          {this.props.displayLoadingIndicatorEnd && this.renderLoader()}
         </View>
         <Animated.View style={headerStyle}>
           <Animated.View style={{ flex: 1, transform: [{ translateY: contentTranslate }] }}>
@@ -455,7 +455,7 @@ export default class AgendaView extends Component {
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           style={scrollPadStyle}
-          scrollEventThrottle={200}
+          scrollEventThrottle={8}
           scrollsToTop={false}
           onTouchStart={this.onTouchStart}
           onTouchEnd={this.onTouchEnd}
