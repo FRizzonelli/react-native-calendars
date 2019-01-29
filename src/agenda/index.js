@@ -9,7 +9,7 @@ import { parseDate, xdateToData } from '../interface';
 import styleConstructor from './style';
 import ReservationsList from './two-way-reservation-list';
 
-const HEADER_HEIGHT = Platform.select({ ios:104, android: 100 });
+const HEADER_HEIGHT = 108;
 const KNOB_HEIGHT = 24;
 
 //Fallback when RN version is < 0.44
