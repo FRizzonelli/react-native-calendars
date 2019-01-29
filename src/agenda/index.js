@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { ActivityIndicator, Animated, Dimensions, Text, View, ViewPropTypes } from 'react-native';
+import { ActivityIndicator, Animated, Dimensions, Platform, Text, View, ViewPropTypes } from 'react-native';
 import XDate from 'xdate';
 import CalendarList from '../calendar-list';
 import dateutils from '../dateutils';
@@ -9,7 +9,7 @@ import { parseDate, xdateToData } from '../interface';
 import styleConstructor from './style';
 import ReservationsList from './two-way-reservation-list';
 
-const HEADER_HEIGHT = 104;
+const HEADER_HEIGHT = Platform.select({ ios:104, android: 100 });
 const KNOB_HEIGHT = 24;
 
 //Fallback when RN version is < 0.44
@@ -365,8 +365,8 @@ export default class AgendaView extends Component {
     });
 
     const contentTranslate = this.state.scrollY.interpolate({
-      inputRange: [0, agendaHeight],
-      outputRange: [0, agendaHeight / 2],
+      inputRange: [0, agendaHeight - Platform.select({ android: KNOB_HEIGHT, ios: KNOB_HEIGHT - 8 })],
+      outputRange: [0, (agendaHeight - Platform.select({ android: KNOB_HEIGHT, ios: KNOB_HEIGHT - 8 })) / 2],
       extrapolate: 'clamp'
     });
 
@@ -405,7 +405,7 @@ export default class AgendaView extends Component {
     // {this.props.displayLoadingIndicatorEnd && this.renderLoader()}
     return (
       <View onLayout={this.onLayout} style={[this.props.style, { flex: 1, overflow: 'hidden' }]}>
-      <View style={[this.styles.reservations, this.props.displayLoadingIndicatorEnd && { marginTop: 24 }]}>
+        <View style={[this.styles.reservations, this.props.displayLoadingIndicatorEnd && { marginTop: 24 }]}>
           {this.renderReservations()}
         </View>
         <Animated.View style={headerStyle}>
