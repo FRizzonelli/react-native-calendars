@@ -1,3 +1,4 @@
+import debounce from 'lodash.debounce';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ActivityIndicator, Animated, Dimensions, Platform, Text, View, ViewPropTypes } from 'react-native';
@@ -292,7 +293,7 @@ export default class AgendaView extends Component {
         renderEmptyData={this.props.renderEmptyData}
         initialDay={this.state.topDay}
         calendarIsReady={this.state.calendarIsReady}
-        onDayChange={this.onDayChange.bind(this)}
+        onDayChange={debounce(this.onDayChange.bind(this), 250)}
         onStartReached={this.props.onStartReached}
         onEndReached={this.props.onEndReached}
         theme={this.props.theme}
